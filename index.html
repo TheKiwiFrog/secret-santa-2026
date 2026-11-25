@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Secret Santa 2026</title>
+<style>
+body{margin:0;font-family:system-ui,sans-serif;background:#14281d;color:#f6f1e7;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.c{width:min(92vw,380px);background:#1d3a2a;border-radius:20px;padding:28px;text-align:center}
+h1{margin:0 0 6px;font-size:26px}p{margin:6px 0 18px;opacity:.8}
+select,input,button{width:100%;box-sizing:border-box;font-size:17px;padding:13px;border-radius:12px;border:0;margin-bottom:12px}
+input{text-transform:uppercase;letter-spacing:3px;text-align:center}
+button{background:#c8352b;color:#fff;font-weight:600}
+#r{font-size:30px;font-weight:700;margin:14px 0 4px}#e{color:#ffb4ab;min-height:20px}
+</style></head><body><div class="c">
+<h1>🎅 Secret Santa</h1><p>Budget: CHF 30</p>
+<div id="f"><select id="n"></select><input id="k" placeholder="YOUR CODE" maxlength="6" autocomplete="off">
+<button id="b">Reveal</button><div id="e"></div></div>
+<div id="o" hidden><p>You're buying a gift for</p><div id="r"></div><p>Keep it secret! 🤫</p></div>
+</div>
+<script>
+const P={"Ellie":{"s":"KIpQPxwwAsuhyUh+3xizFg==","d":"J2C2lvEJUPQSPDLAdv3R0+lTnXQyCgNtheQaVUiqJFo1JfJvGfyDXZI="},"Nico":{"s":"4J7Nr8JtV278fqfREHJAuA==","d":"y64YT0/HRLrQe6xxuZi8U24/SDxxR1BMJnwy0FY0/bItqb0NWYC31Omv+1x4qzc="},"Guillaume":{"s":"1N/RH9VlHfDOLNfrR5wXVA==","d":"93GscDyW0BhxY91zxbO7JBv1vjU9QOlJ4erwrqqP0MiB07NIOokFw+tsBuE="},"Kristian":{"s":"8a7JC9RcnlT5ihfcY5ChTg==","d":"CghJD+keds1tCOp6x5VTmom7zxzMyZ97lKtyWAallkCkutDu2pPagCz5Qg=="},"Zuzana":{"s":"nBgunvq7hdJB2z/NNMM+4A==","d":"hmdzpXkVsWyHhDhhudNiXtZwJgjxYsNnPgvdvaJFruhk8dfvIJGTizMN"},"Tobi":{"s":"DsP/3vCTcxXWwTo99GagCw==","d":"DidZp/aFf9XT6KBh1YfXs/DtkF0v++ynezhWCpXX56ghJcJEUsY071uPPSk="},"Oli":{"s":"RhwI67C1OSUORqbRXymnDg==","d":"ZIepXC/RXitw/EKzoXxgmzgph6z0YqwRHU+BT/XxEiPZxcNcFGijqXxO"},"Ashley":{"s":"wBKA2JDNvt0NfcwrcXwDQQ==","d":"wWw6h9wx9v4ZCoRQ3ctMAPzfPyV5cgSK2nir5HkAtZPy4FWBjRteOMhji1Kc5Q=="},"Owen":{"s":"zV8HT/AUCQnQ2KtaQoPYJg==","d":"qI0MtUcZz1O72RQMkXdNrel6hhPID1eFuD86sVuMjBXltrl8s0vWJFWz"}};
+const s=document.getElementById('n');
+Object.keys(P).forEach(n=>{const o=document.createElement('option');o.textContent=n;s.appendChild(o)});
+const b64=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));
+function pre(){const h=location.hash.slice(1).split('-');if(!h[0])return;const n=Object.keys(P).find(k=>k.toLowerCase()===h[0].toLowerCase());if(n){s.value=n;if(h[1])document.getElementById('k').value=h[1].toUpperCase();}}
+pre();addEventListener('hashchange',pre);
+document.getElementById('b').onclick=async()=>{
+ const e=document.getElementById('e');e.textContent='';
+ try{
+  const n=s.value,code=document.getElementById('k').value.trim().toUpperCase(),x=P[n];
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(x.s),iterations:150000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+  const d=b64(x.d);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:d.slice(0,12)},key,d.slice(12));
+  document.getElementById('r').textContent=JSON.parse(new TextDecoder().decode(pt)).to;
+  document.getElementById('f').hidden=true;document.getElementById('o').hidden=false;
+ }catch(_){e.textContent='Wrong name or code'}
+};
+</script></body></html>
